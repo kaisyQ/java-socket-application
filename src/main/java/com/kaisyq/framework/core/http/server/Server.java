@@ -55,34 +55,40 @@ public class Server {
             System.err.println("Cannot start server... Error" + ex.getMessage());
         }
     }
-
     private void extracted(Socket socket) throws IOException {
-        try (BufferedReader input = new BufferedReader(
-                new InputStreamReader(
-                    socket.getInputStream(), 
-                    StandardCharsets.UTF_8
-                )
-            )
-        ) {
-            PrintWriter output = new PrintWriter(socket.getOutputStream());
-      
-            StringBuilder resultHeader = new StringBuilder();
-            
+        try (
+                BufferedReader input = new BufferedReader(
+                    new InputStreamReader(
+                        socket.getInputStream(), 
+                        StandardCharsets.UTF_8)
+                );
+                PrintWriter output = new PrintWriter(socket.getOutputStream());
+            ) 
+        {
             String line;
 
+            StringBuilder res = new StringBuilder();
+
             while ((line = input.readLine()) != null) {
-                resultHeader.append(line).append("\n");
+                res.append("<p>" + line + "</p>"); 
             }
 
-            System.out.println(resultHeader);
+
+            System.out.println(res.toString());
 
             output.println("HTTP/1.1 200 OK");
             output.println("Content-Type: text/html; charset=utf-8");
             output.println();
-            output.println("<p>########Some response from custom backend server########</p>");
-            
+
+            output.println(res.toString());
+
             output.flush();
-            System.out.println("Client disconnected!");
+ 
+        } catch (IOException e) {
+            System.err.println("Error processing client request: " + e.getMessage());
         }
+    
+        System.out.println("Client disconnected!");
     }
+
 }
